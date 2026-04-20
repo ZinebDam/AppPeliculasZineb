@@ -22,20 +22,22 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun LoginScreen(navController: NavController){
+fun LoginScreen(navController: NavController) {
 
     val context = LocalContext.current
     var usuario by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // Persistencia: Cargar el email guardado al iniciar
     LaunchedEffect(Unit) {
         val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
         val guardado = sharedPref.getString("usuario_guardado", "")
         if (!guardado.isNullOrEmpty()) {
-            usuario = guardado // Lo pone automáticamente en el cuadro de texto
+            usuario = guardado
         }
     }
 
+    // Usamos colores oscuros del degradado, pero el resto vendrá del Theme
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(Color(0xFF2B2B2B), Color(0xFF000000))
     )
@@ -56,7 +58,7 @@ fun LoginScreen(navController: NavController){
             Text(
                 text = "CINEVIBE",
                 style = MaterialTheme.typography.displayMedium,
-                color = Color(0xFFFFD700),
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 4.sp
             )
@@ -71,27 +73,27 @@ fun LoginScreen(navController: NavController){
 
             Spacer(modifier = Modifier.height(50.dp))
 
-
             Text(
                 "Usuario",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground, // <--- CAMBIO AQUÍ
                 modifier = Modifier.align(Alignment.Start).padding(start = 8.dp, bottom = 8.dp),
                 fontSize = 14.sp
             )
+
             OutlinedTextField(
                 value = usuario,
                 onValueChange = { usuario = it },
                 placeholder = { Text("Tu usuario", color = Color.DarkGray) },
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFFFFD700)) },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }, // <--- CAMBIO AQUÍ
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF1E1E1E),
-                    unfocusedContainerColor = Color(0xFF1E1E1E),
-                    focusedBorderColor = Color(0xFFFFD700),
+                    focusedContainerColor = MaterialTheme.colorScheme.surface, // <--- CAMBIO AQUÍ
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface, // <--- CAMBIO AQUÍ
+                    focusedBorderColor = MaterialTheme.colorScheme.primary, // <--- CAMBIO AQUÍ
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
 
@@ -99,41 +101,41 @@ fun LoginScreen(navController: NavController){
 
             Text(
                 "Contraseña",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.Start).padding(start = 8.dp, bottom = 8.dp),
                 fontSize = 14.sp
             )
+
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 placeholder = { Text("••••••••", color = Color.DarkGray) },
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFFD700)) },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                 visualTransformation = PasswordVisualTransformation(),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF1E1E1E),
-                    unfocusedContainerColor = Color(0xFF1E1E1E),
-                    focusedBorderColor = Color(0xFFFFD700),
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            
             Button(
                 onClick = { navController.navigate("lista") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD700)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
             ) {
-                Text("INICIAR SESIÓN", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("INICIAR SESIÓN", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -141,7 +143,7 @@ fun LoginScreen(navController: NavController){
             TextButton(onClick = { navController.navigate("registro")}) {
                 Row {
                     Text("¿Aún no tienes cuenta? ", color = Color.Gray)
-                    Text("Regístrate", color = Color(0xFFFFD700), fontWeight = FontWeight.Bold)
+                    Text("Regístrate", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             }
         }

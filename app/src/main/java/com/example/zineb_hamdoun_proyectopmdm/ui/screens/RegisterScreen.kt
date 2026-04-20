@@ -25,9 +25,17 @@ import androidx.navigation.NavController
 fun RegisterScreen(navController: NavController) {
 
     val context = LocalContext.current
-    var email by remember { mutableStateOf("") } // Esta es la que lee el botón
+
+
+    var nombre by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var sexo by remember { mutableStateOf("M") }
-    val gradientBackground = Brush.verticalGradient(colors = listOf(Color(0xFF2B2B2B), Color(0xFF000000)))
+
+    val gradientBackground = Brush.verticalGradient(
+        colors = listOf(Color(0xFF2B2B2B), Color(0xFF000000))
+    )
 
     Box(modifier = Modifier.fillMaxSize().background(gradientBackground)) {
         Column(
@@ -38,73 +46,102 @@ fun RegisterScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(40.dp))
-            Text("CREAR CUENTA", style = MaterialTheme.typography.headlineMedium, color = Color(0xFFFFD700), fontWeight = FontWeight.ExtraBold)
+
+            Text(
+                text = "CREAR CUENTA",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.ExtraBold
+            )
 
             Spacer(modifier = Modifier.height(30.dp))
 
 
-            RegistroInput(label = "Nombre completo", icon = Icons.Default.Person)
-            Spacer(modifier = Modifier.height(15.dp))
-
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Correo electrónico", color = Color.Gray) },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Email, null, tint = Color(0xFFFFD700)) },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF1E1E1E),
-                    unfocusedContainerColor = Color(0xFF1E1E1E),
-                    focusedBorderColor = Color(0xFFFFD700),
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                )
+            RegistroInput(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = "Nombre completo",
+                icon = Icons.Default.Person
             )
 
             Spacer(modifier = Modifier.height(15.dp))
-            RegistroInput(label = "Teléfono", icon = Icons.Default.Phone)
+
+            // Campo Email
+            RegistroInput(
+                value = email,
+                onValueChange = { email = it },
+                label = "Correo electrónico",
+                icon = Icons.Default.Email
+            )
+
             Spacer(modifier = Modifier.height(15.dp))
-            RegistroInput(label = "Contraseña", icon = Icons.Default.Lock, isPass = true)
+
+
+            RegistroInput(
+                value = telefono,
+                onValueChange = { telefono = it },
+                label = "Teléfono",
+                icon = Icons.Default.Phone
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+
+            RegistroInput(
+                value = password,
+                onValueChange = { password = it },
+                label = "Contraseña",
+                icon = Icons.Default.Lock,
+                isPass = true
+            )
 
             Spacer(modifier = Modifier.height(25.dp))
 
+            Text(
+                text = "Sexo",
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.align(Alignment.Start)
+            )
 
-            Text("Sexo", color = Color.White, modifier = Modifier.align(Alignment.Start))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                RadioButton(selected = sexo == "M", onClick = { sexo = "M" }, colors = RadioButtonDefaults.colors(selectedColor = Color(0xFFFFD700)))
-                Text("Masculino", color = Color.White)
+                RadioButton(
+                    selected = sexo == "M",
+                    onClick = { sexo = "M" },
+                    colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                )
+                Text("Masculino", color = MaterialTheme.colorScheme.onBackground)
                 Spacer(modifier = Modifier.width(20.dp))
-                RadioButton(selected = sexo == "F", onClick = { sexo = "F" }, colors = RadioButtonDefaults.colors(selectedColor = Color(0xFFFFD700)))
-                Text("Femenino", color = Color.White)
+                RadioButton(
+                    selected = sexo == "F",
+                    onClick = { sexo = "F" },
+                    colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                )
+                Text("Femenino", color = MaterialTheme.colorScheme.onBackground)
             }
 
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
                 onClick = {
-
-                    if (email.isNotEmpty()) {
-
+                    // VALIDACIÓN TOTAL: Comprobamos que todos los campos tengan algo
+                    if (nombre.isNotEmpty() && email.isNotEmpty() && telefono.isNotEmpty() && password.isNotEmpty()) {
                         val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
                         sharedPref.edit().putString("usuario_guardado", email).apply()
+
                         navController.navigate("login")
                     } else {
-
                         android.widget.Toast.makeText(
                             context,
-                            "Por favor, introduce un email",
+                            "Por favor, completa todos los campos",
                             android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD700)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("REGISTRARME", color = Color.Black, fontWeight = FontWeight.Bold)
+                Text("REGISTRARME", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -113,24 +150,28 @@ fun RegisterScreen(navController: NavController) {
 
 
 @Composable
-fun RegistroInput(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, isPass: Boolean = false) {
-    var textState by remember { mutableStateOf("") }
-
+fun RegistroInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isPass: Boolean = false
+) {
     OutlinedTextField(
-        value = textState,
-        onValueChange = { textState = it },
+        value = value,
+        onValueChange = onValueChange,
         label = { Text(label, color = Color.Gray) },
         modifier = Modifier.fillMaxWidth(),
-        leadingIcon = { Icon(icon, null, tint = Color(0xFFFFD700)) },
+        leadingIcon = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
         visualTransformation = if (isPass) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFF1E1E1E),
-            unfocusedContainerColor = Color(0xFF1E1E1E),
-            focusedBorderColor = Color(0xFFFFD700),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = Color.Transparent,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
         )
     )
 }

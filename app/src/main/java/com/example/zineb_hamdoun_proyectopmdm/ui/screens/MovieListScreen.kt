@@ -44,7 +44,6 @@ data class Pelicula(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(navController: NavController) {
-    // 1. Herramientas para el mensaje de abajo (SnackBar)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -57,28 +56,35 @@ fun MovieListScreen(navController: NavController) {
     )
 
     Scaffold(
-
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Lista de películas", fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFD700)) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color(0xFF121212))
+                title = {
+                    Text(
+                        "LISTA DE PELÍCULAS",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    // Acción al pulsar el botón +
                     scope.launch {
-                        snackbarHostState.showSnackbar("Función para añadir nueva película (Mock)")
+                        snackbarHostState.showSnackbar("Añadir nueva película")
                     }
                 },
-                containerColor = Color(0xFFFFD700)
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir", tint = Color.Black)
+                Icon(Icons.Default.Add, contentDescription = "Añadir")
             }
         },
-        containerColor = Color(0xFF121212)
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -96,9 +102,7 @@ fun MovieListScreen(navController: NavController) {
 
 @Composable
 fun CardPelicula(peli: Pelicula) {
-
     var showDialog by remember { mutableStateOf(false) }
-
 
     if (showDialog) {
         AlertDialog(
@@ -112,7 +116,7 @@ fun CardPelicula(peli: Pelicula) {
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("CANCELAR")
+                    Text("CANCELAR", color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
@@ -122,7 +126,9 @@ fun CardPelicula(peli: Pelicula) {
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -144,13 +150,28 @@ fun CardPelicula(peli: Pelicula) {
                     .padding(horizontal = 12.dp)
                     .weight(1f)
             ) {
-                Text(text = peli.titulo, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 1)
-                Text(text = "Dir: ${peli.director}", color = Color.Gray, fontSize = 11.sp)
+                Text(
+                    text = peli.titulo,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = "Dir: ${peli.director}",
+                    color = Color.Gray,
+                    fontSize = 11.sp
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Surface(color = Color(0xFF333333), shape = RoundedCornerShape(4.dp)) {
+
+
+                Surface(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(4.dp)
+                ) {
                     Text(
                         text = peli.genero.uppercase(),
-                        color = Color(0xFFFFD700),
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
@@ -158,18 +179,31 @@ fun CardPelicula(peli: Pelicula) {
                 }
             }
 
-
             IconButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Gray, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Borrar",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
             }
-
 
             Column(
                 modifier = Modifier.padding(end = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
-                Text(text = peli.nota, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                Icon(
+                    Icons.Default.Star,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = peli.nota,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 13.sp
+                )
             }
         }
     }
