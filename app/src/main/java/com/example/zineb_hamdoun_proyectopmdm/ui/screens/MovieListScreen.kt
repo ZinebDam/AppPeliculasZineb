@@ -20,9 +20,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.example.zineb_hamdoun_proyectopmdm.R
 import androidx.compose.foundation.Image
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
+import androidx.room3.Delete
+import kotlinx.coroutines.launch
 
 
 data class Pelicula(
@@ -31,15 +39,17 @@ data class Pelicula(
     val nota: String,
     val genero: String,
     val imagen: Int
-
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieListScreen() {
+fun MovieListScreen(navController: NavController) {
+    // 1. Herramientas para el mensaje de abajo (SnackBar)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     val peliculas = listOf(
-        Pelicula("3 metros sobre el cielo", "F. González Molina", "8.5", "Romance",
-            R.drawable.tres),
+        Pelicula("3 metros sobre el cielo", "F. González Molina", "8.5", "Romance", R.drawable.tres),
         Pelicula("Fast & Furious", "Rob Cohen", "7.8", "Acción", R.drawable.fast),
         Pelicula("Zipi y Zape", "Oskar Santos", "6.5", "Comedia", R.drawable.zipizape),
         Pelicula("Sofía", "Meryem Benm'Barek", "7.2", "Drama", R.drawable.sofia),
@@ -47,6 +57,8 @@ fun MovieListScreen() {
     )
 
     Scaffold(
+
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Lista de películas", fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFD700)) },
@@ -54,14 +66,24 @@ fun MovieListScreen() {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {}, containerColor = Color(0xFFFFD700)) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
+            FloatingActionButton(
+                onClick = {
+                    // Acción al pulsar el botón +
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Función para añadir nueva película (Mock)")
+                    }
+                },
+                containerColor = Color(0xFFFFD700)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir", tint = Color.Black)
             }
         },
         containerColor = Color(0xFF121212)
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize(),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -74,6 +96,28 @@ fun MovieListScreen() {
 
 @Composable
 fun CardPelicula(peli: Pelicula) {
+
+    var showDialog by remember { mutableStateOf(false) }
+
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("¿Eliminar película?") },
+            text = { Text("¿Estás seguro de que quieres eliminar '${peli.titulo}'?") },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("SÍ, ELIMINAR", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("CANCELAR")
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,7 +129,6 @@ fun CardPelicula(peli: Pelicula) {
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Image(
                 painter = painterResource(id = peli.imagen),
                 contentDescription = "Cartel de ${peli.titulo}",
@@ -96,59 +139,37 @@ fun CardPelicula(peli: Pelicula) {
                 contentScale = ContentScale.Crop
             )
 
-
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 12.dp)
                     .weight(1f)
             ) {
-                Text(
-                    text = peli.titulo,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    maxLines = 1
-                )
-                Text(
-                    text = "Dir: ${peli.director}",
-                    color = Color.Gray,
-                    fontSize = 12.sp
-                )
-
+                Text(text = peli.titulo, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 1)
+                Text(text = "Dir: ${peli.director}", color = Color.Gray, fontSize = 11.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-
-
-                Surface(
-                    color = Color(0xFF333333),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
+                Surface(color = Color(0xFF333333), shape = RoundedCornerShape(4.dp)) {
                     Text(
                         text = peli.genero.uppercase(),
                         color = Color(0xFFFFD700),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
 
+            IconButton(onClick = { showDialog = true }) {
+                Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Gray, modifier = Modifier.size(20.dp))
+            }
+
+
             Column(
-                modifier = Modifier.padding(end = 16.dp),
+                modifier = Modifier.padding(end = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    tint = Color(0xFFFFD700),
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = peli.nota,
-                    color = Color.White,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp
-                )
+                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
+                Text(text = peli.nota, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
             }
         }
     }

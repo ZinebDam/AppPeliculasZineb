@@ -1,5 +1,6 @@
 package com.example.zineb_hamdoun_proyectopmdm.ui.screens
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,17 +14,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun LoginScreen(){
+fun LoginScreen(navController: NavController){
 
+    val context = LocalContext.current
     var usuario by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    LaunchedEffect(Unit) {
+        val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val guardado = sharedPref.getString("usuario_guardado", "")
+        if (!guardado.isNullOrEmpty()) {
+            usuario = guardado // Lo pone automáticamente en el cuadro de texto
+        }
+    }
 
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(Color(0xFF2B2B2B), Color(0xFF000000))
@@ -70,7 +81,7 @@ fun LoginScreen(){
             OutlinedTextField(
                 value = usuario,
                 onValueChange = { usuario = it },
-                placeholder = { Text("Tu nombre de usuario", color = Color.DarkGray) },
+                placeholder = { Text("Tu usuario", color = Color.DarkGray) },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFFFFD700)) },
                 shape = RoundedCornerShape(16.dp),
@@ -114,7 +125,7 @@ fun LoginScreen(){
 
             
             Button(
-                onClick = { },
+                onClick = { navController.navigate("lista") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -127,7 +138,7 @@ fun LoginScreen(){
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            TextButton(onClick = { }) {
+            TextButton(onClick = { navController.navigate("registro")}) {
                 Row {
                     Text("¿Aún no tienes cuenta? ", color = Color.Gray)
                     Text("Regístrate", color = Color(0xFFFFD700), fontWeight = FontWeight.Bold)
