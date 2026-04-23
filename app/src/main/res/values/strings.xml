@@ -1,3 +1,40 @@
 <resources>
-    <string name="app_name">zineb_hamdoun_proyectopmdm</string>
+    <string name="nombre_app">zineb_hamdoun_proyectopmdm</string>
+
+    <string name="login_titulo_principal">CINEVIBE</string>
+    <string name="login_subtitulo">GESTIÓN MULTIMEDIA</string>
+    <string name="login_etiq_usuario">Usuario</string>
+    <string name="login_pista_usuario">Tu usuario</string>
+    <string name="login_etiq_pass">Contraseña</string>
+    <string name="login_pista_pass">••••••••</string>
+    <string name="login_boton_entrar">INICIAR SESIÓN</string>
+    <string name="login_sin_cuenta">¿Aún no tienes cuenta? </string>
+    <string name="login_ir_registro">Regístrate</string>
+
+    <string name="registro_titulo_pantalla">CREAR CUENTA</string>
+    <string name="registro_etiq_nombre">Nombre completo</string>
+    <string name="registro_etiq_email">Correo electrónico</string>
+    <string name="registro_etiq_tlf">Teléfono</string>
+    <string name="registro_etiq_pass">Contraseña</string>
+    <string name="registro_etiq_sexo">Sexo</string>
+    <string name="registro_sexo_masc">Masculino</string>
+    <string name="registro_sexo_fem">Femenino</string>
+    <string name="registro_boton_enviar">REGISTRARME</string>
+    <string name="aviso_campos_vacios">Por favor, completa todos los campos</string>
+
+    <string name="lista_titulo_barra">LISTA DE PELÍCULAS</string>
+    <string name="borrar_titulo_alerta">¿Eliminar película?</string>
+    <string name="borrar_texto_alerta">¿Estás seguro de que quieres eliminar esta película?</string>
+    <string name="borrar_si">SÍ, ELIMINAR</string>
+    <string name="borrar_no">CANCELAR</string>
+
+    <string name="form_cabecera_editar">Editar Película</string>
+    <string name="form_cabecera_crear">Añadir Película</string>
+    <string name="form_etiq_titulo">Título de la película</string>
+    <string name="form_etiq_director">Director</string>
+    <string name="form_etiq_nota">Nota</string>
+    <string name="form_etiq_genero">Género</string>
+    <string name="form_boton_guardar">Actualizar</string>
+    <string name="form_boton_crear">Crear Película</string>
+    <string name="form_volver_atras">Volver</string>
 </resources>

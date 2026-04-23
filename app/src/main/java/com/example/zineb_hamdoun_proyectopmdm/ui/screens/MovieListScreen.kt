@@ -1,13 +1,12 @@
 package com.example.zineb_hamdoun_proyectopmdm.ui.screens
 
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,17 +21,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zineb_hamdoun_proyectopmdm.R
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import androidx.room3.Delete
-import kotlinx.coroutines.launch
 
 
+
+// Aqui he definido la estructura de datos para las películas
 data class Pelicula(
     val titulo: String,
     val director: String,
@@ -44,9 +45,11 @@ data class Pelicula(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(navController: NavController) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Lista de películas
     val peliculas = listOf(
         Pelicula("3 metros sobre el cielo", "F. González Molina", "8.5", "Romance", R.drawable.tres),
         Pelicula("Fast & Furious", "Rob Cohen", "7.8", "Acción", R.drawable.fast),
@@ -61,7 +64,7 @@ fun MovieListScreen(navController: NavController) {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "LISTA DE PELÍCULAS",
+                        text = stringResource(R.string.lista_titulo_barra),
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -72,12 +75,9 @@ fun MovieListScreen(navController: NavController) {
             )
         },
         floatingActionButton = {
+            // Botón para ir al formulario de añadir película
             FloatingActionButton(
-                onClick = {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Añadir nueva película")
-                    }
-                },
+                onClick = { navController.navigate("formulario") },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -86,6 +86,7 @@ fun MovieListScreen(navController: NavController) {
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
+
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -94,29 +95,30 @@ fun MovieListScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(peliculas) { peli ->
-                CardPelicula(peli)
+                CardPelicula(peli = peli, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun CardPelicula(peli: Pelicula) {
+fun CardPelicula(peli: Pelicula, navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
 
+    // Este es el código para el diálogo de confirmación para borrar
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("¿Eliminar película?") },
-            text = { Text("¿Estás seguro de que quieres eliminar '${peli.titulo}'?") },
+            title = { Text(stringResource(R.string.borrar_titulo_alerta)) },
+            text = { Text(stringResource(R.string.borrar_texto_alerta)) },
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("SÍ, ELIMINAR", color = Color.Red)
+                    Text(stringResource(R.string.borrar_si), color = Color.Red)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("CANCELAR", color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.borrar_no), color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
@@ -125,10 +127,12 @@ fun CardPelicula(peli: Pelicula) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+            .height(120.dp)
+            .clickable {
+                // Con este código enviamos todos los datos al formulario para editar
+                navController.navigate("formulario/${peli.titulo}/${peli.director}/${peli.nota}/${peli.genero}")
+            },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -137,7 +141,7 @@ fun CardPelicula(peli: Pelicula) {
         ) {
             Image(
                 painter = painterResource(id = peli.imagen),
-                contentDescription = "Cartel de ${peli.titulo}",
+                contentDescription = null,
                 modifier = Modifier
                     .width(90.dp)
                     .fillMaxHeight()
@@ -164,7 +168,6 @@ fun CardPelicula(peli: Pelicula) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-
                 Surface(
                     color = MaterialTheme.colorScheme.background,
                     shape = RoundedCornerShape(4.dp)
@@ -179,6 +182,7 @@ fun CardPelicula(peli: Pelicula) {
                 }
             }
 
+            // Botón(papelera) que lleva al diálogo de borrar
             IconButton(onClick = { showDialog = true }) {
                 Icon(
                     Icons.Default.Delete,

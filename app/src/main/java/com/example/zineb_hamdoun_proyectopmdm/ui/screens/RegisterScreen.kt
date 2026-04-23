@@ -1,6 +1,7 @@
 package com.example.zineb_hamdoun_proyectopmdm.ui.screens
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,17 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.zineb_hamdoun_proyectopmdm.R
 
 @Composable
 fun RegisterScreen(navController: NavController) {
 
     val context = LocalContext.current
-
 
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -48,7 +49,7 @@ fun RegisterScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "CREAR CUENTA",
+                text = stringResource(R.string.registro_titulo_pantalla),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.ExtraBold
@@ -56,49 +57,47 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-
+            // Aqui usé una función personalizada para cada campo
             RegistroInput(
                 value = nombre,
                 onValueChange = { nombre = it },
-                label = "Nombre completo",
+                label = stringResource(R.string.registro_etiq_nombre),
                 icon = Icons.Default.Person
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            // Campo Email
             RegistroInput(
                 value = email,
                 onValueChange = { email = it },
-                label = "Correo electrónico",
+                label = stringResource(R.string.registro_etiq_email),
                 icon = Icons.Default.Email
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
-
             RegistroInput(
                 value = telefono,
                 onValueChange = { telefono = it },
-                label = "Teléfono",
+                label = stringResource(R.string.registro_etiq_tlf),
                 icon = Icons.Default.Phone
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
-
             RegistroInput(
                 value = password,
                 onValueChange = { password = it },
-                label = "Contraseña",
+                label = stringResource(R.string.registro_etiq_pass),
                 icon = Icons.Default.Lock,
                 isPass = true
             )
 
             Spacer(modifier = Modifier.height(25.dp))
 
+            // Este es selector de sexo con RadioButtons
             Text(
-                text = "Sexo",
+                text = stringResource(R.string.registro_etiq_sexo),
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.Start)
             )
@@ -109,46 +108,44 @@ fun RegisterScreen(navController: NavController) {
                     onClick = { sexo = "M" },
                     colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                 )
-                Text("Masculino", color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.registro_sexo_masc), color = MaterialTheme.colorScheme.onBackground)
                 Spacer(modifier = Modifier.width(20.dp))
                 RadioButton(
                     selected = sexo == "F",
                     onClick = { sexo = "F" },
                     colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                 )
-                Text("Femenino", color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.registro_sexo_fem), color = MaterialTheme.colorScheme.onBackground)
             }
 
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
                 onClick = {
-                    // VALIDACIÓN TOTAL: Comprobamos que todos los campos tengan algo
                     if (nombre.isNotEmpty() && email.isNotEmpty() && telefono.isNotEmpty() && password.isNotEmpty()) {
+                        // Aqui guardo el email para que aparezca en el Login automáticamente
                         val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
                         sharedPref.edit().putString("usuario_guardado", email).apply()
 
-                        navController.navigate("login")
+                        navController.navigate("login") {
+                            popUpTo("registro") { inclusive = true }
+                        }
                     } else {
-                        android.widget.Toast.makeText(
-                            context,
-                            "Por favor, completa todos los campos",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Por favor, rellena todos los campos", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("REGISTRARME", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.registro_boton_enviar), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
 
-
+// Esta es la función auxiliar para no repetir el código de los TextFields
 @Composable
 fun RegistroInput(
     value: String,
@@ -160,7 +157,7 @@ fun RegistroInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, color = Color.Gray) },
+        label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
         leadingIcon = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
         visualTransformation = if (isPass) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
@@ -169,9 +166,7 @@ fun RegistroInput(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = Color.Transparent,
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+            unfocusedBorderColor = Color.Transparent
         )
     )
 }
