@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.compose)
+
 }
 
 android {
@@ -12,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.example.zineb_hamdoun_proyectopmdm"
         minSdk = 27
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -46,10 +48,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui)
     implementation(libs.androidx.room3.common.jvm)
-    implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.navigation3.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,6 +62,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation("androidx.navigation:navigation-compose:2.8.8")
-    implementation("androidx.compose.material:material-icons-extended")
 }

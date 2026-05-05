@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.zineb_hamdoun_proyectopmdm.R
@@ -28,7 +30,7 @@ import com.example.zineb_hamdoun_proyectopmdm.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieFormScreen(
-    navController: NavController,
+    navController: Any,
     tituloInicial: String? = null,
     directorInicial: String? = null,
     notaInicial: String? = null,
@@ -46,11 +48,20 @@ fun MovieFormScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(if (esEdicion) stringResource(R.string.form_cabecera_editar) else stringResource(R.string.form_cabecera_crear))
+                    Text(
+                        if (esEdicion) stringResource(R.string.form_cabecera_editar)
+                        else stringResource(R.string.form_cabecera_crear)
+                    )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.form_volver_atras))
+                    IconButton(onClick = {
+                        val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
+                        backStack.removeLastOrNull()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
                     }
                 }
             )
@@ -71,7 +82,11 @@ fun MovieFormScreen(
                 onValueChange = { titulo = it },
                 label = { Text(stringResource(R.string.form_etiq_titulo)) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                )
             )
 
             OutlinedTextField(
@@ -79,7 +94,11 @@ fun MovieFormScreen(
                 onValueChange = { director = it },
                 label = { Text(stringResource(R.string.form_etiq_director)) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                )
             )
 
             Row(
@@ -91,26 +110,43 @@ fun MovieFormScreen(
                     onValueChange = { nota = it },
                     label = { Text(stringResource(R.string.form_etiq_nota)) },
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    )
                 )
                 OutlinedTextField(
                     value = genero,
                     onValueChange = { genero = it },
                     label = { Text(stringResource(R.string.form_etiq_genero)) },
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    )
                 )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = { val backStack = navController as androidx.navigation3.runtime.NavBackStack<*>
+
+                    backStack.removeLastOrNull()},
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
-                Text(if (esEdicion) stringResource(R.string.form_boton_guardar) else stringResource(R.string.form_boton_crear))
+                Text(
+                    text = if (esEdicion) stringResource(R.string.form_boton_guardar)
+                    else stringResource(R.string.form_boton_crear),
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

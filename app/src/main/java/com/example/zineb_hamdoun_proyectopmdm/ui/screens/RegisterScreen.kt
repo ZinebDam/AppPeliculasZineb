@@ -1,6 +1,6 @@
 package com.example.zineb_hamdoun_proyectopmdm.ui.screens
 
-import android.content.Context
+
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,18 +13,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.zineb_hamdoun_proyectopmdm.R
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(navController: Any) {
 
     val context = LocalContext.current
 
@@ -34,11 +31,7 @@ fun RegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var sexo by remember { mutableStateOf("M") }
 
-    val gradientBackground = Brush.verticalGradient(
-        colors = listOf(Color(0xFF2B2B2B), Color(0xFF000000))
-    )
-
-    Box(modifier = Modifier.fillMaxSize().background(gradientBackground)) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -123,22 +116,28 @@ fun RegisterScreen(navController: NavController) {
             Button(
                 onClick = {
                     if (nombre.isNotEmpty() && email.isNotEmpty() && telefono.isNotEmpty() && password.isNotEmpty()) {
-                        // Aqui guardo el email para que aparezca en el Login automáticamente
-                        val sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                        // Aquí guardo el email para que aparezca en el Login automáticamente
+                        val sharedPref = context.getSharedPreferences("prefs", android.content.Context.MODE_PRIVATE)
                         sharedPref.edit().putString("usuario_guardado", email).apply()
 
-                        navController.navigate("login") {
-                            popUpTo("registro") { inclusive = true }
-                        }
+
+                        val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
+
+                        backStack.removeLastOrNull()
+
+                        Toast.makeText(context, "Registro completado con éxito", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "Por favor, rellena todos los campos", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text(stringResource(R.string.registro_boton_enviar), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.registro_boton_enviar), fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -166,7 +165,7 @@ fun RegistroInput(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = Color.Transparent
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
         )
     )
 }

@@ -19,13 +19,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavBackStack
+import com.example.zineb_hamdoun_proyectopmdm.ListaRoute
 import com.example.zineb_hamdoun_proyectopmdm.R
+import com.example.zineb_hamdoun_proyectopmdm.RegistroRoute
+import com.example.zineb_hamdoun_proyectopmdm.ui.theme.Zineb_hamdoun_proyectopmdmTheme
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: Any) {
 
     val context = LocalContext.current
     var usuario by remember { mutableStateOf("") }
@@ -40,15 +46,10 @@ fun LoginScreen(navController: NavController) {
         }
     }
 
-    // El fondo degradado que me pide el diseño del proyecto
-    val gradientBackground = Brush.verticalGradient(
-        colors = listOf(Color(0xFF2B2B2B), Color(0xFF000000))
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradientBackground),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -68,7 +69,7 @@ fun LoginScreen(navController: NavController) {
 
             Text(
                 text = stringResource(R.string.login_subtitulo),
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
                 letterSpacing = 2.sp
@@ -87,7 +88,7 @@ fun LoginScreen(navController: NavController) {
             OutlinedTextField(
                 value = usuario,
                 onValueChange = { usuario = it },
-                placeholder = { Text(stringResource(R.string.login_pista_usuario), color = Color.DarkGray) },
+                placeholder = { Text(stringResource(R.string.login_pista_usuario), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                 shape = RoundedCornerShape(16.dp),
@@ -95,7 +96,7 @@ fun LoginScreen(navController: NavController) {
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Transparent
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
                 )
             )
 
@@ -112,7 +113,7 @@ fun LoginScreen(navController: NavController) {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                placeholder = { Text(stringResource(R.string.login_pista_pass), color = Color.DarkGray) },
+                placeholder = { Text(stringResource(R.string.login_pista_pass), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                 visualTransformation = PasswordVisualTransformation(),
@@ -121,7 +122,7 @@ fun LoginScreen(navController: NavController) {
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Transparent
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
                 )
             )
 
@@ -131,10 +132,9 @@ fun LoginScreen(navController: NavController) {
             Button(
                 onClick = {
                     if (usuario.isNotEmpty() && password.isNotEmpty()) {
-                        navController.navigate("lista") {
-                            // Aqui limpio el historial para que no se pueda volver al login al dar atrás
-                            popUpTo("login") { inclusive = true }
-                        }
+                        val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
+
+                        backStack.add(ListaRoute)
                     } else {
                         Toast.makeText(
                             context,
@@ -144,13 +144,15 @@ fun LoginScreen(navController: NavController) {
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
             ) {
                 Text(
                     text = stringResource(R.string.login_boton_entrar),
-                    color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
@@ -158,15 +160,25 @@ fun LoginScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-
-            TextButton(onClick = { navController.navigate("registro") }) {
+            TextButton(onClick = {
+                val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
+                backStack.add(RegistroRoute)
+            }) {
                 Row {
-                    Text(stringResource(R.string.login_sin_cuenta), color = Color.Gray)
+                    Text(stringResource(R.string.login_sin_cuenta), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(" " + stringResource(R.string.login_ir_registro),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold)
                 }
             }
         }
+    }
+}
+
+@PreviewScreenSizes
+@Composable
+fun LoginScreenPreview() {
+    Zineb_hamdoun_proyectopmdmTheme {
+        LoginScreen(navController = rememberNavController())
     }
 }

@@ -30,11 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-
+import com.example.zineb_hamdoun_proyectopmdm.FormularioRoute
 
 
 // Aqui he definido la estructura de datos para las películas
 data class Pelicula(
+    val id: Int,
     val titulo: String,
     val director: String,
     val nota: String,
@@ -42,24 +43,32 @@ data class Pelicula(
     val imagen: Int
 )
 
+data class Usuario(
+    val id: Int,
+    val nombre: String,
+    val email: String,
+    val telefono: String,
+    val sexo: String
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieListScreen(navController: NavController) {
+fun MovieListScreen(navController: Any) {
 
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Lista de películas
+
+    // Lista de películas con IDs únicos
     val peliculas = listOf(
-        Pelicula("3 metros sobre el cielo", "F. González Molina", "8.5", "Romance", R.drawable.tres),
-        Pelicula("Fast & Furious", "Rob Cohen", "7.8", "Acción", R.drawable.fast),
-        Pelicula("Zipi y Zape", "Oskar Santos", "6.5", "Comedia", R.drawable.zipizape),
-        Pelicula("Sofía", "Meryem Benm'Barek", "7.2", "Drama", R.drawable.sofia),
-        Pelicula("Culpa mía", "Domingo González", "8.0", "Romance", R.drawable.culpa)
+        Pelicula(1, "3 metros sobre el cielo", "F. González Molina", "8.5", "Romance", R.drawable.tres),
+        Pelicula(2, "Fast & Furious", "Rob Cohen", "7.8", "Acción", R.drawable.fast),
+        Pelicula(3, "Zipi y Zape", "Oskar Santos", "6.5", "Comedia", R.drawable.zipizape),
+        Pelicula(4, "Sofía", "Meryem Benm'Barek", "7.2", "Drama", R.drawable.sofia),
+        Pelicula(5, "Culpa mía", "Domingo González", "8.0", "Romance", R.drawable.culpa)
     )
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -77,7 +86,12 @@ fun MovieListScreen(navController: NavController) {
         floatingActionButton = {
             // Botón para ir al formulario de añadir película
             FloatingActionButton(
-                onClick = { navController.navigate("formulario") },
+                onClick = {
+
+                    val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
+
+                    backStack.add(FormularioRoute())
+                },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -91,18 +105,24 @@ fun MovieListScreen(navController: NavController) {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(all = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(peliculas) { peli ->
-                CardPelicula(peli = peli, navController = navController)
+            items(items = peliculas) { peli ->
+
+                val backStack = navController as androidx.navigation3.runtime.NavBackStack<*>
+
+                CardPelicula(
+                    peli = peli,
+                    navController = backStack
+                )
             }
         }
     }
 }
 
 @Composable
-fun CardPelicula(peli: Pelicula, navController: NavController) {
+fun CardPelicula(peli: Pelicula, navController: Any) {
     var showDialog by remember { mutableStateOf(false) }
 
     // Este es el código para el diálogo de confirmación para borrar
@@ -113,7 +133,7 @@ fun CardPelicula(peli: Pelicula, navController: NavController) {
             text = { Text(stringResource(R.string.borrar_texto_alerta)) },
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.borrar_si), color = Color.Red)
+                    Text(stringResource(R.string.borrar_si), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -129,8 +149,18 @@ fun CardPelicula(peli: Pelicula, navController: NavController) {
             .fillMaxWidth()
             .height(120.dp)
             .clickable {
-                // Con este código enviamos todos los datos al formulario para editar
-                navController.navigate("formulario/${peli.titulo}/${peli.director}/${peli.nota}/${peli.genero}")
+
+                val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
+
+
+                backStack.add(
+                    FormularioRoute(
+                        titulo = peli.titulo,
+                        director = peli.director,
+                        nota = peli.nota,
+                        genero = peli.genero
+                    )
+                )
             },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp)
@@ -163,7 +193,7 @@ fun CardPelicula(peli: Pelicula, navController: NavController) {
                 )
                 Text(
                     text = "Dir: ${peli.director}",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -187,7 +217,7 @@ fun CardPelicula(peli: Pelicula, navController: NavController) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = "Borrar",
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }
