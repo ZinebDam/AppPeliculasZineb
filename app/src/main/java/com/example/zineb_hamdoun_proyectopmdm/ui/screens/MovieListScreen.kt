@@ -5,43 +5,31 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zineb_hamdoun_proyectopmdm.R
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
+import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.zineb_hamdoun_proyectopmdm.FormularioRoute
+import com.example.zineb_hamdoun_proyectopmdm.Movie
+import com.example.zineb_hamdoun_proyectopmdm.MovieViewModel
 
-
-// Aqui he definido la estructura de datos para las películas
-data class Pelicula(
-    val id: Int,
-    val titulo: String,
-    val director: String,
-    val nota: String,
-    val genero: String,
-    val imagen: Int
-)
 
 data class Usuario(
     val id: Int,
@@ -53,22 +41,16 @@ data class Usuario(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieListScreen(navController: Any) {
+fun MovieListScreen(navController: Any, viewModel: MovieViewModel) {
 
     val context = LocalContext.current
 
 
-    // Lista de películas con IDs únicos
-    val peliculas = listOf(
-        Pelicula(1, "3 metros sobre el cielo", "F. González Molina", "8.5", "Romance", R.drawable.tres),
-        Pelicula(2, "Fast & Furious", "Rob Cohen", "7.8", "Acción", R.drawable.fast),
-        Pelicula(3, "Zipi y Zape", "Oskar Santos", "6.5", "Comedia", R.drawable.zipizape),
-        Pelicula(4, "Sofía", "Meryem Benm'Barek", "7.2", "Drama", R.drawable.sofia),
-        Pelicula(5, "Culpa mía", "Domingo González", "8.0", "Romance", R.drawable.culpa)
-    )
+    LaunchedEffect(Unit) {
+        viewModel.fetchMovies()
+    }
 
     Scaffold(
-
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -78,67 +60,131 @@ fun MovieListScreen(navController: Any) {
                         color = MaterialTheme.colorScheme.primary
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         floatingActionButton = {
-            // Botón para ir al formulario de añadir película
             FloatingActionButton(
                 onClick = {
-
-                    val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
-
+                    val backStack =
+                        navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
                     backStack.add(FormularioRoute())
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir")
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_input_add),
+                    contentDescription = "Añadir"
+                )
             }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(all = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(items = peliculas) { peli ->
-
-                val backStack = navController as androidx.navigation3.runtime.NavBackStack<*>
-
-                CardPelicula(
-                    peli = peli,
-                    navController = backStack
+        if (viewModel.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else if (viewModel.errorMessage != null) {
+            // SI HAY UN ERROR, LO PINTAMOS AQUÍ EN MEDIO PARA VER QUÉ PASA
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "⚠️ Error de Conexión con la API",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = viewModel.errorMessage ?: "",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.fetchMovies() }) {
+                        Text("Reintentar conectar")
+                    }
+                }
+            }
+        } else if (viewModel.moviesList.isEmpty()) {
+            // SI NO HAY ERROR PERO LA LISTA VIENE VACÍA DEL SERVIDOR
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "El servidor contestó bien, pero la base de datos de películas está vacía (0 películas).",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(24.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(all = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(items = viewModel.moviesList) { peli ->
+                    val backStack = navController as androidx.navigation3.runtime.NavBackStack<*>
+                    CardPelicula(peli, backStack)
+                }
             }
         }
     }
 }
 
 @Composable
-fun CardPelicula(peli: Pelicula, navController: Any) {
+fun CardPelicula(peli: Movie, navController: Any) {
     var showDialog by remember { mutableStateOf(false) }
+    val viewModel: MovieViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
-    // Este es el código para el diálogo de confirmación para borrar
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(R.string.borrar_titulo_alerta)) },
-            text = { Text(stringResource(R.string.borrar_texto_alerta)) },
+            title = {
+                Text(stringResource(R.string.borrar_titulo_alerta))
+            },
+            text = {
+                Text(stringResource(R.string.borrar_texto_alerta))
+            },
             confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.borrar_si), color = MaterialTheme.colorScheme.error)
+                TextButton(
+                    onClick = {
+                        viewModel.deleteMovie(peli.id)
+                        showDialog = false
+                    }
+                ) {
+                    Text(
+                        stringResource(R.string.borrar_si),
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.borrar_no), color = MaterialTheme.colorScheme.primary)
+                TextButton(
+                    onClick = { showDialog = false }
+                ) {
+                    Text(
+                        stringResource(R.string.borrar_no),
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         )
@@ -149,33 +195,38 @@ fun CardPelicula(peli: Pelicula, navController: Any) {
             .fillMaxWidth()
             .height(120.dp)
             .clickable {
-
-                val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
-
-
+                val backStack =
+                    navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
                 backStack.add(
                     FormularioRoute(
-                        titulo = peli.titulo,
-                        director = peli.director,
-                        nota = peli.nota,
-                        genero = peli.genero
+                        titulo = peli.title,
+                        director = peli.directorFullname ?: "Desconocido",
+                        nota = peli.rating?.toString() ?: "N/A",
+                        genero = "Película"
                     )
                 )
             },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = peli.imagen),
+            coil3.compose.AsyncImage(
+                model = peli.imageUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .width(90.dp)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)),
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            bottomStart = 16.dp
+                        )
+                    ),
                 contentScale = ContentScale.Crop
             )
 
@@ -185,17 +236,20 @@ fun CardPelicula(peli: Pelicula, navController: Any) {
                     .weight(1f)
             ) {
                 Text(
-                    text = peli.titulo,
+                    text = peli.title,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     maxLines = 1
                 )
+
                 Text(
-                    text = "Dir: ${peli.director}",
+                    text = peli.description,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 11.sp
+                    fontSize = 11.sp,
+                    maxLines = 2
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Surface(
@@ -203,19 +257,23 @@ fun CardPelicula(peli: Pelicula, navController: Any) {
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = peli.genero.uppercase(),
+                        text = peli.directorFullname ?: "Sin director",
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.padding(
+                            horizontal = 8.dp,
+                            vertical = 2.dp
+                        ),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Botón(papelera) que lleva al diálogo de borrar
-            IconButton(onClick = { showDialog = true }) {
+            IconButton(
+                onClick = { showDialog = true }
+            ) {
                 Icon(
-                    Icons.Default.Delete,
+                    painter = painterResource(android.R.drawable.ic_delete),
                     contentDescription = "Borrar",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
@@ -227,13 +285,14 @@ fun CardPelicula(peli: Pelicula, navController: Any) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    Icons.Default.Star,
+                    painter = painterResource(android.R.drawable.btn_star_big_on),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
+
                 Text(
-                    text = peli.nota,
+                    text = peli.rating?.toString() ?: "N/A",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 13.sp
@@ -242,3 +301,4 @@ fun CardPelicula(peli: Pelicula, navController: Any) {
         }
     }
 }
+

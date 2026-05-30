@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -50,14 +51,14 @@ class MainActivity : ComponentActivity() {
 fun NavegacionApp() {
 
     val backStack = rememberNavBackStack(LoginRoute)
-
+    val movieViewModel: MovieViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider {
             // Login
             entry<LoginRoute> {
-                LoginScreen(navController = backStack)
+                LoginScreen(navController = backStack, viewModel = movieViewModel)
             }
 
             // Registro
@@ -67,7 +68,7 @@ fun NavegacionApp() {
 
             // Lista
             entry<ListaRoute> {
-                MovieListScreen(navController = backStack)
+                MovieListScreen(navController = backStack, viewModel = movieViewModel)
             }
 
             // Formulario

@@ -7,18 +7,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.zineb_hamdoun_proyectopmdm.R
+
 
 @Composable
 fun RegisterScreen(navController: Any) {
@@ -50,12 +50,11 @@ fun RegisterScreen(navController: Any) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Aqui usé una función personalizada para cada campo
             RegistroInput(
                 value = nombre,
                 onValueChange = { nombre = it },
                 label = stringResource(R.string.registro_etiq_nombre),
-                icon = Icons.Default.Person
+                iconRes = android.R.drawable.ic_menu_my_calendar
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -64,7 +63,7 @@ fun RegisterScreen(navController: Any) {
                 value = email,
                 onValueChange = { email = it },
                 label = stringResource(R.string.registro_etiq_email),
-                icon = Icons.Default.Email
+                iconRes = android.R.drawable.ic_dialog_email
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -73,7 +72,7 @@ fun RegisterScreen(navController: Any) {
                 value = telefono,
                 onValueChange = { telefono = it },
                 label = stringResource(R.string.registro_etiq_tlf),
-                icon = Icons.Default.Phone
+                iconRes = android.R.drawable.ic_menu_call
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -82,13 +81,12 @@ fun RegisterScreen(navController: Any) {
                 value = password,
                 onValueChange = { password = it },
                 label = stringResource(R.string.registro_etiq_pass),
-                icon = Icons.Default.Lock,
+                iconRes = android.R.drawable.ic_lock_idle_lock,
                 isPass = true
             )
 
             Spacer(modifier = Modifier.height(25.dp))
 
-            // Este es selector de sexo con RadioButtons
             Text(
                 text = stringResource(R.string.registro_etiq_sexo),
                 color = MaterialTheme.colorScheme.onBackground,
@@ -116,13 +114,10 @@ fun RegisterScreen(navController: Any) {
             Button(
                 onClick = {
                     if (nombre.isNotEmpty() && email.isNotEmpty() && telefono.isNotEmpty() && password.isNotEmpty()) {
-                        // Aquí guardo el email para que aparezca en el Login automáticamente
                         val sharedPref = context.getSharedPreferences("prefs", android.content.Context.MODE_PRIVATE)
                         sharedPref.edit().putString("usuario_guardado", email).apply()
 
-
                         val backStack = navController as androidx.navigation3.runtime.NavBackStack<androidx.navigation3.runtime.NavKey>
-
                         backStack.removeLastOrNull()
 
                         Toast.makeText(context, "Registro completado con éxito", Toast.LENGTH_SHORT).show()
@@ -144,13 +139,12 @@ fun RegisterScreen(navController: Any) {
     }
 }
 
-// Esta es la función auxiliar para no repetir el código de los TextFields
 @Composable
 fun RegistroInput(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconRes: Int,
     isPass: Boolean = false
 ) {
     OutlinedTextField(
@@ -158,7 +152,13 @@ fun RegistroInput(
         onValueChange = onValueChange,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
-        leadingIcon = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
         visualTransformation = if (isPass) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
